@@ -5,7 +5,6 @@ project (libmctp)
 set(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} \
     -Wall \
-    -Werror \
     -Wextra \
     -Wunused \
     -Wnull-dereference \
