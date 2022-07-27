@@ -14,6 +14,7 @@ struct mctp_binding_astpcie {
 	uint16_t bdf;
 	uint8_t medium_id;
 	int fd;
+	char mctp_dev[128];
 };
 
 /* returns pointer to structure holding this generic binding */

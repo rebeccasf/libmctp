@@ -23,6 +23,9 @@ struct mctp_binding_astpcie;
 
 struct mctp_binding_astpcie *mctp_astpcie_init(void);
 
+void mctp_astpcie_mctp_dev_name(struct mctp_binding_astpcie *astpcie,
+				char *name);
+
 struct mctp_binding *mctp_astpcie_core(struct mctp_binding_astpcie *b);
 
 int mctp_astpcie_poll(struct mctp_binding_astpcie *astpcie, int timeout);

@@ -148,10 +148,10 @@ uint8_t mctp_astpcie_get_medium_id(struct mctp_binding_astpcie *astpcie)
 
 static int mctp_astpcie_open(struct mctp_binding_astpcie *astpcie)
 {
-	int fd = open(AST_DRV_FILE, O_RDWR);
+	int fd = open(astpcie->mctp_dev, O_RDWR);
 
 	if (fd < 0) {
-		mctp_prerr("Cannot open: %s, errno = %d", AST_DRV_FILE, errno);
+		mctp_prerr("Cannot open: %s, errno = %d", astpcie->mctp_dev, errno);
 
 		return fd;
 	}
@@ -374,6 +374,7 @@ struct mctp_binding_astpcie *mctp_astpcie_init(void)
 	astpcie->binding.tx = mctp_astpcie_tx;
 	astpcie->binding.start = mctp_astpcie_start;
 	astpcie->binding.pkt_size = MCTP_PACKET_SIZE(MCTP_BTU);
+	strcpy(astpcie->mctp_dev, AST_DRV_FILE);
 
 	assert(astpcie->binding.pkt_size - sizeof(struct mctp_hdr) <=
 	       PCIE_MAX_DATA_LEN);
@@ -389,6 +390,15 @@ struct mctp_binding_astpcie *mctp_astpcie_init(void)
 		sizeof(struct mctp_astpcie_pkt_private);
 
 	return astpcie;
+}
+
+/*
+ * Change the file name of MCTP device
+ */
+void mctp_astpcie_mctp_dev_name(struct mctp_binding_astpcie *astpcie, char *name)
+{
+	if (strcmp(name, ""))
+		strcpy(astpcie->mctp_dev, name);
 }
 
 /*
