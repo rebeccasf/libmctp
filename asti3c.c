@@ -9,6 +9,28 @@
 
 #undef pr_fmt
 #define pr_fmt(x) "asti3c: " x
+#define BMC_I3C_SLAVE_ADDR       0x08
+
+static uint8_t crc8 (uint8_t crc, const uint8_t *data, uint8_t len)
+{
+        int i, j;
+
+        if (data == NULL)
+                return crc;
+
+        for (i = 0; i < len; ++i) {
+                crc ^= data[i];
+
+                for (j = 0; j < 8; ++j) {
+                        if ((crc & 0x80) != 0)
+                                crc = (uint8_t) ((crc << 1) ^ 0x07);
+                        else
+                                crc <<= 1;
+                }
+        }
+
+        return crc;
+}
 
 static int mctp_asti3c_tx(struct mctp_binding *binding, struct mctp_pktbuf *pkt)
 {
@@ -23,14 +45,31 @@ static int mctp_asti3c_tx(struct mctp_binding *binding, struct mctp_pktbuf *pkt)
 
 	len = mctp_pktbuf_size(pkt);
 
-	/* CRC/PECs are appended in hardware, skipping calculation here */
+	/* /dev/i3c-mctp-dev CRC/PECs are appended in hardware, skipping calculation here.
+	 * /sys/bus/i3c/i3c-x/slavemq CRC/PECs are not appended in hardware, manually calculation here */
 
 	mctp_prdebug("Transmitting packet, len: %zu", len);
 	mctp_trace_tx(pkt->data, len);
 
-	write_len = write(pkt_prv->fd, pkt->data, len);
+        if (pkt_prv->append_pec) {
+		uint8_t i3c_addr = (BMC_I3C_SLAVE_ADDR << 1) | 0x01;
+		uint8_t pec;
+		uint8_t *buffer = malloc(len + 1);
+		pec = crc8(0, &i3c_addr, 1);
+		pec = crc8(pec, (uint8_t *)pkt->data, len);
+
+		memcpy(buffer, pkt->data, len);
+		buffer[len] = pec;
+		len+= 1;
+		write_len = write(pkt_prv->fd, buffer, len);
+		mctp_trace_tx(buffer, len);
+		free(buffer);
+        } else {
+		write_len = write(pkt_prv->fd, pkt->data, len);
+	}
+
 	if (write_len != len) {
-		mctp_prerr("TX error");
+		mctp_prerr("TX error write_len=%d len=%d", write_len, len);
 		return -1;
 	}
 

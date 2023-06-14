@@ -33,6 +33,7 @@ struct mctp_binding_asti3c {
 struct mctp_asti3c_pkt_private {
 	/* Accept the fd into the binding to carry out I/O operations */
 	int fd;
+        bool append_pec;
 } __attribute__((__packed__));
 
 struct mctp_binding_asti3c *mctp_asti3c_init(void);
