@@ -25,7 +25,7 @@ add_definitions (-DMCTP_HAVE_FILEIO)
 add_definitions (-DMCTP_HAVE_STDIO)
 add_definitions (-DMCTP_DEFAULT_ALLOC)
 
-add_library (mctp_intel STATIC alloc.c asti3c.c astlpc.c core.c log.c libmctp.h serial.c astpcie.c smbus.c)
+add_library (mctp_intel STATIC alloc.c asti3c.c astlpc.c core.c log.c libmctp.h serial.c astpcie.c smbus.c starfive-i3c.c starfive-pcie.c)
 
 target_include_directories (mctp_intel PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
@@ -84,5 +84,20 @@ add_executable (test_asti3c tests/test_asti3c.c)
 target_link_libraries (test_asti3c mctp_intel)
 add_test (NAME asti3c COMMAND test_asti3c)
 
+add_executable (test_starfive_i3c tests/test_starfive_i3c.c)
+target_link_libraries (test_starfive_i3c mctp_intel)
+add_test (NAME starfive_i3c COMMAND test_starfive_i3c)
+
+add_executable (mctp_starfive_pcie_discovery utils/mctp-starfive-pcie-discovery.c)
+target_link_libraries (mctp_starfive_pcie_discovery mctp_intel)
+
+add_executable (mctp_starfive_pcie_register_type utils/mctp-starfive-pcie-register-type.c)
+target_link_libraries (mctp_starfive_pcie_register_type mctp_intel)
+
+add_executable (test_starfive_pcie tests/test_starfive_pcie.c)
+target_link_options(test_starfive_pcie PRIVATE -z muldefs)
+target_link_libraries (test_starfive_pcie mctp_intel)
+add_test (NAME starfive_pcie COMMAND test_starfive_pcie)
+
 install (TARGETS mctp_intel DESTINATION lib)
-install (FILES libmctp.h libmctp-cmds.h libmctp-vdpci.h libmctp-smbus.h libmctp-astpcie.h libmctp-msgtypes.h libmctp-asti3c.h libmctp-log.h DESTINATION include)
+install (FILES libmctp.h libmctp-cmds.h libmctp-vdpci.h libmctp-smbus.h libmctp-astpcie.h libmctp-msgtypes.h libmctp-asti3c.h libmctp-log.h libmctp-starfive-i3c.h libmctp-starfive-pcie.h DESTINATION include)

@@ -36,6 +36,11 @@ libmctp_la_SOURCES += starfive-i3c.c
 include_HEADERS += libmctp-starfive-i3c.h
 endif
 
+if LIBMCTP_BINDING_starfive_pcie
+libmctp_la_SOURCES += starfive-pcie.c
+include_HEADERS += libmctp-starfive-pcie.h
+endif
+
 if HAVE_SYSTEMD
 systemdsystemunit_DATA = \
 	mctp-demux.service
@@ -63,7 +68,7 @@ TESTS = $(check_PROGRAMS)
 check_PROGRAMS = tests/test_eid tests/test_seq tests/test_bridge \
 		 tests/test_astlpc tests/test_serial \
 		 tests/test_astpcie tests/test_cmds \
-		 tests/test_starfive_i3c
+		 tests/test_starfive_i3c test/test_starfive_pcie
 # We set a global LDADD here, as there's no way to specify it for all
 # tests. This means other targets' LDADDs need to be overridden.
 LDADD = tests/libtest-utils.a libmctp.la
